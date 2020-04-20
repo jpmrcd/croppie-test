@@ -1,0 +1,68 @@
+<script src="https://code.jquery.com/jquery-3.5.0.min.js"
+    integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="croppie.css" />
+<script src="croppie.js"></script>
+
+<div class="actions">
+    <a class="btn file-btn">
+        <span>Upload</span>
+        <input type="file" id="upload" value="Choose a file" accept="image/*" />
+    </a>
+    <button class="upload-result">Result</button>
+</div>
+<div id="upload-demo"></div>
+<script>
+    function demoUpload() {
+        var $uploadCrop;
+
+        function readFile(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $uploadCrop = $('#upload-demo').croppie({
+                        enableExif: true,
+                        viewport: {
+                            // height: 2229,
+                            // width: 8386
+                            height: input.files[0].height,
+                            width: input.files[0].width
+                        }
+                    });
+
+                    console.log('img file', input.files[0]);
+                    console.log('blob url', URL.createObjectURL(input.files[0]));
+                    $uploadCrop.croppie('bind', {
+                        url: e.target.result
+                        // url: URL.createObjectURL(input.files[0])
+                    }).then(function (e) {
+                        console.log('jQuery bind complete', e);
+                    });
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }
+            else {
+                swal("Sorry - you're browser doesn't support the FileReader API");
+            }
+        }
+
+        $('#upload').on('change', function () { readFile(this); });
+        $('.upload-result').on('click', function (ev) {
+            $uploadCrop.croppie('result', {
+                type: 'blob',
+                size: 'original',
+                format: 'jpeg',
+                quality: undefined
+            }).then(function (resp) {
+                console.log('new blob', resp);
+                console.log('new blob url', URL.createObjectURL(resp));
+                popupResult({
+                    src: resp
+                });
+            });
+        });
+    }
+
+    demoUpload();
+</script>
